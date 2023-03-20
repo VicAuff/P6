@@ -1,0 +1,10 @@
+# Node
+node_modules/
+/node_modules
+
+#MongoDB pass
+.env
+
+# fichiers de compilation et de construction
+dist/
+build/
