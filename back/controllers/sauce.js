@@ -1,7 +1,11 @@
+// Importe le modèle Sauce depuis le fichier "../models/sauce"
 const Sauce = require("../models/sauce");
+// Importe la bibliothèque "fs" (File System) de Node.js pour la gestion des fichiers
 const fs = require("fs");
 
+// Crée une nouvelle sauce
 exports.createSauce = (req, res, next) => {
+  // Extrait l'objet sauce du corps de la requête et supprime les champs _id et _userId
   const sauceObject = JSON.parse(req.body.sauce);
   delete sauceObject._id;
   delete sauceObject._userId;
@@ -13,6 +17,7 @@ exports.createSauce = (req, res, next) => {
     }`,
   });
 
+  // Sauvegarde la sauce et envoie une réponse
   sauce
     .save()
     .then(() => {
@@ -23,7 +28,9 @@ exports.createSauce = (req, res, next) => {
     });
 };
 
+// Récupère une sauce spécifique
 exports.getOneSauce = (req, res, next) => {
+  // Recherche la sauce dans la base de données en utilisant l'ID de la sauce
   Sauce.findOne({
     _id: req.params.id,
   })
@@ -37,6 +44,7 @@ exports.getOneSauce = (req, res, next) => {
     });
 };
 
+// Modifie une sauce existante
 exports.modifySauce = async (req, res, next) => {
   try {
     const sauce = await Sauce.findById(req.params.id);
@@ -81,6 +89,7 @@ exports.modifySauce = async (req, res, next) => {
   }
 };
 
+// Supprime une sauce
 exports.deleteSauce = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id })
     .then((sauce) => {
@@ -102,7 +111,9 @@ exports.deleteSauce = (req, res, next) => {
     });
 };
 
+// Récupère toutes les sauces
 exports.getAllSauce = (req, res, next) => {
+  // Recherche toutes les sauces dans la base de données
   Sauce.find()
     .then((sauces) => {
       res.status(200).json(sauces);
@@ -114,6 +125,7 @@ exports.getAllSauce = (req, res, next) => {
     });
 };
 
+// Gère les likes et les dislikes d'une sauce
 exports.likeDislikeSauce = async (req, res, next) => {
   try {
     const { userId } = req.auth;
@@ -150,6 +162,7 @@ exports.likeDislikeSauce = async (req, res, next) => {
   }
 };
 
+// Gère les likes et les dislikes d'une sauce
 module.exports = {
   createSauce: exports.createSauce,
   getOneSauce: exports.getOneSauce,
