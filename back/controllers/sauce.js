@@ -155,9 +155,9 @@ exports.getAllSauce = (req, res, next) => {
 
 exports.likeDislikeSauce = async (req, res, next) => {
   try {
-    const { userId } = req.auth;
-    const { id: sauceId } = req.params;
-    const { like } = req.body;
+    const { userId } = req.auth; // Récupère l'ID de l'utilisateur à partir de la requête authentifiée
+    const { id: sauceId } = req.params; // Récupère l'ID de la sauce à partir des paramètres de la requête
+    const { like } = req.body; // Récupère la valeur "like" de la requête POST
 
     let update, message;
 
@@ -165,25 +165,52 @@ exports.likeDislikeSauce = async (req, res, next) => {
     const sauce = await Sauce.findOne({ _id: sauceId });
 
     if (like === 1) {
-      update = { $addToSet: { usersLiked: userId }, $inc: { likes: 1 } };
-      message = "Like";
+      if (sauce.usersDisliked.includes(userId)) {
+        update = {
+          // Définit les opérations MongoDB pour mettre à jour la sauce
+          $pull: { usersDisliked: userId },
+          $addToSet: { usersLiked: userId },
+          $inc: { dislikes: -1, likes: 1 },
+        };
+        message = "Dislike annulé et remplacé par un like";
+      } else {
+        // Définit les opérations MongoDB pour ajouter un like à la sauce
+        update = { $addToSet: { usersLiked: userId }, $inc: { likes: 1 } };
+        message = "Like ajouté";
+      }
     } else if (like === -1) {
-      update = { $addToSet: { usersDisliked: userId }, $inc: { dislikes: 1 } };
-      message = "Dislike";
+      // Vérifie si l'utilisateur a disliké la sauce
+      if (sauce.usersLiked.includes(userId)) {
+        // Vérifie si l'utilisateur a précédemment liké la sauce
+        update = {
+          // Définit les opérations MongoDB pour mettre à jour la sauce
+          $pull: { usersLiked: userId },
+          $addToSet: { usersDisliked: userId },
+          $inc: { likes: -1, dislikes: 1 },
+        };
+        message = "Like annulé et remplacé par un dislike";
+      } else {
+        update = {
+          $addToSet: { usersDisliked: userId },
+          $inc: { dislikes: 1 },
+        };
+        message = "Dislike ajouté";
+      }
     } else {
-      // Déterminer si l'utilisateur avait précédemment liké ou disliké la sauce
+      // Si la valeur n'est pas 1 ou -1, cela signifie que l'utilisateur souhaite annuler son like ou dislike précédent
       const liked = sauce.usersLiked.includes(userId);
       const disliked = sauce.usersDisliked.includes(userId);
 
-      // Mettre à jour les compteurs en fonction de l'action précédente
+      // Si l'utilisateur avait précédemment like/dislike la sauce, décrémente le compteur de likes/dislike
       const changeLikes = liked ? -1 : 0;
       const changeDislikes = disliked ? -1 : 0;
 
       update = {
+        // Définit les opérations MongoDB pour mettre à jour la sauce
         $pull: { usersLiked: userId, usersDisliked: userId },
         $inc: { likes: changeLikes, dislikes: changeDislikes },
       };
-      message = "Nothing";
+      message = "Like ou dislike annulé";
     }
 
     const updatedSauce = await Sauce.findOneAndUpdate(
@@ -192,14 +219,16 @@ exports.likeDislikeSauce = async (req, res, next) => {
       {
         new: true,
       }
-    );
+    ); // Met à jour la sauce dans la base de données avec les opérations MongoDB définies
 
     if (!updatedSauce) {
+      // Vérifie si la sauce a bien été mise à jour
       return res.status(404).json({ error: "Sauce non trouvée" });
     }
 
     res.status(200).json({ message });
   } catch (error) {
-    res.status(400).json({ error });
+    console.log(error);
+    res.status(400).json({ error: error.message });
   }
 };

@@ -26,9 +26,3 @@ router.post("/:id/like", auth, sauceCtrl.likeDislikeSauce);
 
 // Exporte le router pour qu'il puisse être utilisé par l'application principale
 module.exports = router;
-
-
-
-
-
-
