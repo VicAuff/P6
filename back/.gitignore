@@ -2,9 +2,12 @@
 node_modules/
 /node_modules
 
-#MongoDB pass
+# MongoDB pass
 .env
 
 # fichiers de compilation et de construction
 dist/
 build/
+
+# Dossier images
+/images
