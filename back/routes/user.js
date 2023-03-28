@@ -10,7 +10,8 @@ const emailValidator = require("../middleware/email-validator");
 // Importation du middleware passwordValidator qui vérifie si le mot de passe fourni est valide
 const passwordValidator = require("../middleware/password-validator");
 
-// Définition des routes pour l'inscription et la connexion des utilisateurs en utilisant les middlewares et contrôleurs appropriés
+// Définition des routes pour l'inscription et la connexion des utilisateurs 
+// en utilisant les middlewares et contrôleurs appropriés
 router.post("/signup", emailValidator, passwordValidator, userCtrl.signup);
 router.post("/login", userCtrl.login);
 

@@ -36,7 +36,8 @@ exports.login = (req, res, next) => {
           .status(401)
           .json({ message: "Paire login/mot de passe incorrecte" });
       }
-      // Si l'utilisateur existe, compare le mot de passe fourni avec le mot de passe haché stocké dans la base de données
+      // Si l'utilisateur existe, compare le mot de passe fourni
+      // avec le mot de passe haché stocké dans la base de données
       bcrypt
         .compare(req.body.password, user.password)
         .then((valid) => {
@@ -46,7 +47,8 @@ exports.login = (req, res, next) => {
               .status(401)
               .json({ message: "Paire login/mot de passe incorrecte" });
           }
-          // Si les mots de passe correspondent, génère un token d'authentification avec jsonwebtoken et renvoie l'ID de l'utilisateur et le token dans la réponse
+          // Si les mots de passe correspondent, génère un token d'authentification avec jsonwebtoken
+          // et renvoie l'ID de l'utilisateur et le token dans la réponse
           res.status(200).json({
             userId: user._id,
             token: jwt.sign({ userId: user._id }, "RANDOM_TOKEN_SECRET", {
