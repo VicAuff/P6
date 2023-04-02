@@ -168,8 +168,11 @@ exports.likeDislikeSauce = async (req, res, next) => {
       if (sauce.usersDisliked.includes(userId)) {
         update = {
           // Définit les opérations MongoDB pour mettre à jour la sauce
+          // $pull: retire l'ID de l'utilisateur des [] "usersLiked" "usersDisliked" lorsqu'il annule son choix précédent.
           $pull: { usersDisliked: userId },
+          // $addToSet: ajoute l'ID de l'utilisateur aux [] "usersLiked" "usersDisliked" lorsqu'il aime ou n'aime pas une sauce.
           $addToSet: { usersLiked: userId },
+          // $inc: augmente ou diminue les compteurs de "likes" et "dislikes" en fonction des préférences de l'utilisateur.
           $inc: { dislikes: -1, likes: 1 },
         };
         message = "Dislike annulé et remplacé par un like";
@@ -184,14 +187,20 @@ exports.likeDislikeSauce = async (req, res, next) => {
         // Vérifie si l'utilisateur a précédemment liké la sauce
         update = {
           // Définit les opérations MongoDB pour mettre à jour la sauce
+          // $pull: retire l'ID de l'utilisateur des [] "usersLiked" "usersDisliked" lorsqu'il annule son choix précédent.
           $pull: { usersLiked: userId },
+          // $addToSet: ajoute l'ID de l'utilisateur aux [] "usersLiked" "usersDisliked" lorsqu'il aime ou n'aime pas une sauce.
           $addToSet: { usersDisliked: userId },
+          // $inc: augmente ou diminue les compteurs de "likes" et "dislikes" en fonction des préférences de l'utilisateur.
           $inc: { likes: -1, dislikes: 1 },
         };
         message = "Like annulé et remplacé par un dislike";
       } else {
+        // Si l'utilisateur n'a pas précédemment liké la sauce
         update = {
+          // $addToSet: ajoute l'ID de l'utilisateur aux [] "usersLiked" "usersDisliked" lorsqu'il aime ou n'aime pas une sauce.
           $addToSet: { usersDisliked: userId },
+          // $inc: augmente les compteurs de "dislikes" en fonction des préférences de l'utilisateur.
           $inc: { dislikes: 1 },
         };
         message = "Dislike ajouté";
@@ -207,7 +216,11 @@ exports.likeDislikeSauce = async (req, res, next) => {
 
       update = {
         // Définit les opérations MongoDB pour mettre à jour la sauce
+        // $pull: retire l'ID de l'utilisateur des [] "usersLiked" "usersDisliked" quand l'utilisateur annule son choix précédent.
         $pull: { usersLiked: userId, usersDisliked: userId },
+        // $inc: met à jour les compteurs de "likes" "dislikes" en fonction des variables changeLikes et changeDislikes.
+        // si l'utilisateur avait précédemment aimé la sauce, changeLikes sera égal à -1 et changeDislikes sera égal à 0.
+        // si l'utilisateur avait précédemment exprimé un dislike, changeLikes sera égal à 0 et changeDislikes sera égal à -1.
         $inc: { likes: changeLikes, dislikes: changeDislikes },
       };
       message = "Like ou dislike annulé";
